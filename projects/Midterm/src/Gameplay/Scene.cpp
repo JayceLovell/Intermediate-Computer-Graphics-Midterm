@@ -40,6 +40,8 @@ namespace Gameplay {
 
 		GameObject::Sptr mainCam = CreateGameObject("Main Camera");		
 		MainCamera = mainCam->Add<Camera>();
+		MainCamera->SetOrthoEnabled(true);
+		MainCamera->SetOrthoVerticalScale(100.0f);
 
 		_InitPhysics();
 
