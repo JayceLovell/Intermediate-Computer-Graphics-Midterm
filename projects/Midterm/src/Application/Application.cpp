@@ -43,6 +43,7 @@
 #include "Gameplay/Components/SimpleCameraControl.h"
 #include "Gameplay/Components/ParticleSystem.h"
 #include "Gameplay/Components/ObsticleBehaviour.h"
+#include "Gameplay/Components/PlayerMovement.h"
 
 // GUI
 #include "Gameplay/Components/GUI/RectTransform.h"
@@ -272,6 +273,7 @@ void Application::_RegisterClasses()
 	ComponentManager::RegisterType<GuiText>();
 	ComponentManager::RegisterType<ParticleSystem>();
 	ComponentManager::RegisterType<ObsticleBehaviour>();
+	ComponentManager::RegisterType<PlayerMovement>();
 }
 
 void Application::_Load() {

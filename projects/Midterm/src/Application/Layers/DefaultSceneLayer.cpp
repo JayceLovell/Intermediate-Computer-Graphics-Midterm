@@ -47,6 +47,7 @@
 #include "Gameplay/Components/TriggerVolumeEnterBehaviour.h"
 #include "Gameplay/Components/SimpleCameraControl.h"
 #include "Gameplay/Components/ObsticleBehaviour.h"
+#include "Gameplay/Components/PlayerMovement.h"
 
 // Physics
 #include "Gameplay/Physics/RigidBody.h"
@@ -162,6 +163,9 @@ void DefaultSceneLayer::_CreateScene()
 		Texture2D::Sptr    monkeyTex    = ResourceManager::CreateAsset<Texture2D>("textures/monkey-uvMap.png");
 		Texture2D::Sptr    leafTex      = ResourceManager::CreateAsset<Texture2D>("textures/leaves.png");
 		Texture2D::Sptr	roadTexture = ResourceManager::CreateAsset<Texture2D>("textures/road.jpg");
+		Texture2D::Sptr grassTexture = ResourceManager::CreateAsset<Texture2D>("textures/Grass_Texture.png");
+		grassTexture->SetMagFilter(MagFilter::Nearest);
+		roadTexture->SetMagFilter(MagFilter::Nearest);
 		leafTex->SetMinFilter(MinFilter::Nearest);
 		leafTex->SetMagFilter(MagFilter::Nearest);
 
@@ -214,6 +218,12 @@ void DefaultSceneLayer::_CreateScene()
 			RoadMaterial->Name = "Road";
 			RoadMaterial->Set("u_Material.Diffuse", roadTexture);
 			RoadMaterial->Set("u_Material.Shininess", 0.1f);
+		}
+		Material::Sptr GrassMaterial = ResourceManager::CreateAsset<Material>(basicShader);
+		{
+			GrassMaterial->Name = "Grass";
+			GrassMaterial->Set("u_Material.Diffuse", grassTexture);
+			GrassMaterial->Set("u_Material.Shininess", 0.0f);
 		}
 
 		// This will be the reflective material, we'll make the whole thing 90% reflective
@@ -315,21 +325,32 @@ void DefaultSceneLayer::_CreateScene()
 			camera->SetRotation({ 0.0f,0.0f,90.0f });
 		}
 
-		// Set up all our sample objects
-		GameObject::Sptr plane = scene->CreateGameObject("Plane");
+		GameObject::Sptr Road = scene->CreateGameObject("Road");
 		{
-			// Make a big tiled mesh
-			MeshResource::Sptr tiledMesh = ResourceManager::CreateAsset<MeshResource>();
-			tiledMesh->AddParam(MeshBuilderParam::CreatePlane(ZERO, UNIT_Z, UNIT_X, glm::vec2(100.0f), glm::vec2(20.0f)));
-			tiledMesh->GenerateMesh();
-
-			// Create and attach a RenderComponent to the object to draw our mesh
-			RenderComponent::Sptr renderer = plane->Add<RenderComponent>();
-			renderer->SetMesh(tiledMesh);
+			Road->SetPostion(glm::vec3(0.0f));
+			Road->SetRotation(glm::vec3(90.0f, 0.0, 90.0f));
+			Road->SetScale(glm::vec3(12.0f));
+			// Create and attach a renderer for the monkey
+			RenderComponent::Sptr renderer = Road->Add<RenderComponent>();
+			renderer->SetMesh(RoadMesh);
 			renderer->SetMaterial(RoadMaterial);
 
 			// Attach a plane collider that extends infinitely along the X/Y axis
-			RigidBody::Sptr physics = plane->Add<RigidBody>(/*static by default*/);
+			RigidBody::Sptr physics = Road->Add<RigidBody>(/*static by default*/);
+			physics->AddCollider(BoxCollider::Create(glm::vec3(50.0f, 50.0f, 1.0f)))->SetPosition({ 0,0,-1 });
+		}
+		GameObject::Sptr Grass = scene->CreateGameObject("Grass");
+		{
+			Grass->SetPostion(glm::vec3(0.0f));
+			Grass->SetRotation(glm::vec3(90.0f, 0.0, 90.0f));
+			Grass->SetScale(glm::vec3(12.0f));
+			// Create and attach a renderer for the monkey
+			RenderComponent::Sptr renderer = Grass->Add<RenderComponent>();
+			renderer->SetMesh(GrassMesh);
+			renderer->SetMaterial(GrassMaterial);
+
+			// Attach a plane collider that extends infinitely along the X/Y axis
+			RigidBody::Sptr physics = Grass->Add<RigidBody>(/*static by default*/);
 			physics->AddCollider(BoxCollider::Create(glm::vec3(50.0f, 50.0f, 1.0f)))->SetPosition({ 0,0,-1 });
 		}
 
@@ -340,7 +361,7 @@ void DefaultSceneLayer::_CreateScene()
 			Player->SetScale(glm::vec3(2.0f));
 
 			// Add some behaviour that relies on the physics body
-			Player->Add<JumpBehaviour>();
+			//Player->Add<JumpBehaviour>();
 
 			// Create and attach a renderer for the monkey
 			RenderComponent::Sptr renderer = Player->Add<RenderComponent>();
@@ -352,7 +373,10 @@ void DefaultSceneLayer::_CreateScene()
 			trigger->SetFlags(TriggerTypeFlags::Statics | TriggerTypeFlags::Kinematics);
 			trigger->AddCollider(BoxCollider::Create(glm::vec3(1.0f)));
 
+
 			Player->Add<TriggerVolumeEnterBehaviour>();
+
+			Player->Add<PlayerMovement>();
 		}
 
 		GameObject::Sptr ObsticleParent = scene->CreateGameObject("Obsticles");
