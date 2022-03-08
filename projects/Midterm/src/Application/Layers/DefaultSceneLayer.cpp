@@ -46,6 +46,7 @@
 #include "Gameplay/Components/MaterialSwapBehaviour.h"
 #include "Gameplay/Components/TriggerVolumeEnterBehaviour.h"
 #include "Gameplay/Components/SimpleCameraControl.h"
+#include "Gameplay/Components/ObsticleBehaviour.h"
 
 // Physics
 #include "Gameplay/Physics/RigidBody.h"
@@ -152,6 +153,8 @@ void DefaultSceneLayer::_CreateScene()
 
 		// Load in the meshes
 		MeshResource::Sptr monkeyMesh = ResourceManager::CreateAsset<MeshResource>("Monkey.obj");
+		MeshResource::Sptr GrassMesh = ResourceManager::CreateAsset<MeshResource>("Grass.obj");
+		MeshResource::Sptr RoadMesh = ResourceManager::CreateAsset<MeshResource>("Road.obj");
 
 		// Load in some textures
 		Texture2D::Sptr    boxTexture   = ResourceManager::CreateAsset<Texture2D>("textures/box-diffuse.png");
@@ -384,6 +387,10 @@ void DefaultSceneLayer::_CreateScene()
 				volume->AddCollider(collider);
 
 				Obsticle->Add<TriggerVolumeEnterBehaviour>();
+
+				Obsticle->Add<ObsticleBehaviour>();
+				Obsticle->Get<ObsticleBehaviour>()->EndPosition=(glm::vec3(x,-y,z));
+				Obsticle->Get<ObsticleBehaviour>()->Speed = (float)i;
 
 				ObsticleParent->AddChild(Obsticle);
 			}
